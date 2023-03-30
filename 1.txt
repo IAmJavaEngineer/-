@@ -1,0 +1,5 @@
+@ServletComponentScan会去解析扫描出来的类是不是有
+@WebServlet、@WebListener、@WebFilter 这三种注解，
+有的话会把这三种类型的类转换成  ServletRegistrationBean、FilterRegistrationBean 或者ServletListenerRegistrationBean，
+然后让 Spring 容器去解析。 在 SpringBootApplication 上使用@ServletComponentScan 注解后，Servlet、Filter、Listener
+可以直接通过@WebServlet、@WebFilter、@WebListener 注解自动注册，无需其他代码。

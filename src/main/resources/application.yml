@@ -1,0 +1,22 @@
+spring:
+  application:
+    #????????
+    name: elema
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3307/elema?serverTimezone=UTC
+      username: root
+      password: password
+mybatis-plus:
+  configuration:
+    #    ????
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    #    ???????
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      #      ?????????
+      id-type: assign_id
+
+basePath: D:\img\
