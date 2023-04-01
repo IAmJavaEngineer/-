@@ -4,8 +4,10 @@ spring:
     name: elema
   datasource:
     druid:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3307/elema?serverTimezone=UTC
+#      driver-class-name: com.mysql.cj.jdbc.Driver
+      driver-class-name: com.mysql.jdbc.Driver
+#      url: jdbc:mysql://localhost:3307/elema?serverTimezone=UTC
+      url: jdbc:mysql://localhost:3306/elema
       username: root
       password: password
 mybatis-plus:
@@ -19,4 +21,4 @@ mybatis-plus:
       #      ?????????
       id-type: assign_id
 
-basePath: D:\img\
+basePath: /usr/local/img/
