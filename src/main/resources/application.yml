@@ -1,24 +1,41 @@
 spring:
   application:
-    #????????
+    #项目名称，可选
     name: elema
   datasource:
     druid:
-#      driver-class-name: com.mysql.cj.jdbc.Driver
-      driver-class-name: com.mysql.jdbc.Driver
-#      url: jdbc:mysql://localhost:3307/elema?serverTimezone=UTC
-      url: jdbc:mysql://localhost:3306/elema
+      driver-class-name: com.mysql.cj.jdbc.Driver
+#      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://localhost:3307/elema?serverTimezone=UTC
+#      url: jdbc:mysql://localhost:3306/elema
       username: root
       password: password
+
+#  Redis相关配置
+  redis:
+    host: localhost
+    port: 6379
+#    password: password
+#    redis启动时默认提供16个数据库，这里指定在0号数据库中操作
+    database: 0
+    jedis:
+#      Redis连接池配置
+      pool:
+        max-active: 8  #最大连接数
+        max-wait: 1ms  #连接池最大阻塞等待时间
+        max-idle: 4    #连接池中最大空闲连接数
+        min-idle: 0    #连接池中最小空闲连接数
+
 mybatis-plus:
   configuration:
-    #    ????
+    #mybatis-plus日志输出
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-    #    ???????
+    #开启驼峰命名法
     map-underscore-to-camel-case: true
   global-config:
     db-config:
-      #      ?????????
+      #主键策略：雪花算法
       id-type: assign_id
 
-basePath: /usr/local/img/
+#basePath: /usr/local/img/
+basePath: D:\img\
