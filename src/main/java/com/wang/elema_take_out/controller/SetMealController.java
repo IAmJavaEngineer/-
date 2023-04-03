@@ -17,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,8 +41,13 @@ public class SetMealController {
     @Autowired
     CategoryService categoryService;
 
+    @Autowired
+    SetmealDishService setmealDishService;
+
 
     @PostMapping
+    //@CacheEvict表示清理缓存，清理setmealCaChe分组下的所有缓存，allEntries默认为false，设置为true才能清理所有缓存
+    @CacheEvict(value = "setmealCaChe",allEntries = true)
     public R<String> insert(@RequestBody SetmealDto setmealDto){
         setmealService.saveWithDish(setmealDto);
         return R.success("添加成功");
@@ -101,6 +108,7 @@ public class SetMealController {
     }
 
     @DeleteMapping
+    @CacheEvict(value = "setmealCaChe",allEntries = true)
     //前端传过来的参数是数组，不是字面量了，需要用@RequestParam来指定参数接收 ids=1,2,3
     public R<String> delete(@RequestParam List<Long> ids){
         setmealService.removeWithDish(ids);
@@ -113,6 +121,7 @@ public class SetMealController {
      * @param ids
      */
     @PostMapping("/status/{status}")
+    @CacheEvict(value = "setmealCaChe",allEntries = true)
     public R<String> status(@PathVariable Integer status,@RequestParam List<Long> ids){
         LambdaQueryWrapper<Setmeal> setmealLambdaQueryWrapper = new LambdaQueryWrapper<>();
         setmealLambdaQueryWrapper.in(Setmeal::getId,ids);
@@ -132,11 +141,65 @@ public class SetMealController {
     }
 
     @GetMapping("/list")
+    //注意这里的双引号和单引号的用法
+    @Cacheable(value = "setmealCaChe", key = "#setmeal.categoryId+'_'+#setmeal.status")
     public R<List<Setmeal>> list(Setmeal setmeal){
         LambdaQueryWrapper<Setmeal> setmealLambdaQueryWrapper = new LambdaQueryWrapper<>();
         setmealLambdaQueryWrapper.eq(setmeal.getCategoryId()!=null,Setmeal::getCategoryId,setmeal.getCategoryId());
+        setmealLambdaQueryWrapper.eq(setmeal.getStatus()!=null,Setmeal::getStatus,setmeal.getStatus());
         setmealLambdaQueryWrapper.orderByDesc(Setmeal::getUpdateTime);
         List<Setmeal> setmeals = setmealService.list(setmealLambdaQueryWrapper);
         return R.success(setmeals);
+    }
+
+    /**
+     * 修改套餐第一步：回显套餐数据
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public R<SetmealDto> SetmealEcho(@PathVariable String id){
+        Setmeal setmeal = setmealService.getById(id);
+        SetmealDto setmealDto = new SetmealDto();
+        BeanUtils.copyProperties(setmeal,setmealDto);
+        //为Dto的分类名赋值
+        Category category = categoryService.getById(setmealDto.getCategoryId());
+        setmealDto.setCategoryName(category.getName());
+        //查询这个套餐id下的所有菜品，为Dto的菜品集合赋值
+        LambdaQueryWrapper<SetmealDish> setmealDtoLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        setmealDtoLambdaQueryWrapper.eq(SetmealDish::getSetmealId,id);
+        List<SetmealDish> setmealDishes = setmealDishService.list(setmealDtoLambdaQueryWrapper);
+        setmealDto.setSetmealDishes(setmealDishes);
+        return R.success(setmealDto);
+    }
+
+
+    /**
+     * 修改套餐第二步，修改同时清除缓存
+     * @param setmealDto
+     * @return
+     */
+    @PutMapping
+    @CacheEvict(value = "setmealCaChe",allEntries = true)
+    public R<String> update(@RequestBody SetmealDto setmealDto){
+        //将套餐表的数据修改
+        setmealService.updateById(setmealDto);
+
+        /**
+         * 还有套餐下的菜品集合也要修改，修改的表时setmeal_dish
+         * 修改的步骤为
+         *      1、在setmeal_dish表中删除这个套餐下的所有菜品，根据套餐id删除
+         *      2、重新添加这个套餐下的菜品集合
+         */
+        LambdaQueryWrapper<SetmealDish> setmealDishLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        setmealDishLambdaQueryWrapper.eq(SetmealDish::getSetmealId,setmealDto.getId());
+        setmealDishService.remove(setmealDishLambdaQueryWrapper);
+        List<SetmealDish> setmealDishes = setmealDto.getSetmealDishes();
+        setmealDishes = setmealDishes.stream().map((temp)->{
+            temp.setSetmealId(setmealDto.getId());
+            return temp;
+        }).collect(Collectors.toList());
+        setmealDishService.saveBatch(setmealDishes);
+        return R.success("修改成功");
     }
 }

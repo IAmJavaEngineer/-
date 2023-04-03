@@ -8,7 +8,9 @@ import java.util.List;
 @Data
 public class SetmealDto extends Setmeal {
 
+    //套餐下面的菜品集合
     private List<SetmealDish> setmealDishes;
 
+    //套餐分类名
     private String categoryName;
 }

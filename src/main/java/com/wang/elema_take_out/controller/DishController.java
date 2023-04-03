@@ -15,6 +15,8 @@ import org.apache.ibatis.jdbc.SQL;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,7 +52,15 @@ public class DishController {
     @Autowired
     RedisTemplate redisTemplate;
 
+    @Autowired
+    CacheManager cacheManager;
 
+
+    /**
+     * CaChePut:将方法的返回值放入缓存
+     * @param dishDto
+     * @return
+     */
     @PostMapping
     public R<String> save(@RequestBody DishDto dishDto){
 //
@@ -91,6 +101,11 @@ public class DishController {
     }
 
 
+    /**
+     * 修改步骤第一步，回显数据
+     * @param id
+     * @return
+     */
     @GetMapping("/{id}")
     public R<DishDto> get(@PathVariable Long id){
         return R.success(dishService.getWithFlavor(id));
@@ -131,6 +146,7 @@ public class DishController {
      * @return
      */
     @GetMapping("/list")
+
     public R<List<DishDto>> list(DishDto dishDto){
         //构造一个key,大概长这样：dish_1397844303408574465_1
         String key = "dish_"+dishDto.getCategoryId()+"_"+dishDto.getStatus();
