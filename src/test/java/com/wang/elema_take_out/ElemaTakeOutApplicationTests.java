@@ -16,6 +16,10 @@ class ElemaTakeOutApplicationTests {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+
     @Test
     /**
      * 操作String类型的数据
@@ -128,6 +132,17 @@ class ElemaTakeOutApplicationTests {
         //获取指定key对应的value的数据类型
         DataType type = redisTemplate.type("002");
         System.out.println(type);
+    }
+
+    @Test
+    /**
+     * 使用StringRedisTemplate，这样子就不用修改序列化器了
+     */
+    public void testStringRedisTemplate(){
+        ValueOperations<String, String> opsForValue = stringRedisTemplate.opsForValue();
+        opsForValue.set("name","小明");
+        String name = opsForValue.get("name");
+        System.out.println(name);
     }
 }
 

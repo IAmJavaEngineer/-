@@ -15,11 +15,15 @@ import org.apache.ibatis.jdbc.SQL;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +44,11 @@ public class DishController {
 
     @Autowired
     DishFlavorService dishFlavorService;
+
+    @Autowired
+    StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    RedisTemplate redisTemplate;
 
 
     @PostMapping
@@ -87,9 +96,22 @@ public class DishController {
         return R.success(dishService.getWithFlavor(id));
     }
 
+    /**
+     * 每次修改数据都要清理缓存
+     * @param dishDto
+     * @return
+     */
     @PutMapping
     public R<String> update(@RequestBody DishDto dishDto){
         dishService.updateWithFlavor(dishDto);
+//      清理所有缓存
+//        Set keys = redisTemplate.keys("dish_*");
+//        redisTemplate.delete(keys);
+
+//        根据修改某个菜品，清理这个菜品所在的分类id的缓存
+//        构造key
+        String key = "dish_"+dishDto.getCategoryId()+"_1";
+        redisTemplate.delete(key);
         return R.success("修改成功");
     }
 
@@ -110,12 +132,21 @@ public class DishController {
      */
     @GetMapping("/list")
     public R<List<DishDto>> list(DishDto dishDto){
+        //构造一个key,大概长这样：dish_1397844303408574465_1
+        String key = "dish_"+dishDto.getCategoryId()+"_"+dishDto.getStatus();
+        List<DishDto> dishDtos = null;
+        //先从redis数据库/缓存中查询数据，如果有缓存中有数据，直接返回，就不用查询MySQL数据库了
+        dishDtos = (List<DishDto>) redisTemplate.opsForValue().get(key);
+        if (dishDtos != null){
+            return R.success(dishDtos);
+        }
+        //如果缓存中没有数据，就去查询MySQL数据库
         LambdaQueryWrapper<Dish> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(dishDto.getCategoryId()!=null,Dish::getCategoryId,dishDto.getCategoryId());
         lambdaQueryWrapper.eq(dishDto.getCategoryId()!=null,Dish::getStatus,1);
         lambdaQueryWrapper.orderByDesc(Dish::getUpdateTime);
         List<Dish> dishes = dishService.list(lambdaQueryWrapper);
-        List<DishDto> dishDtos = dishes.stream().map((item) ->{
+        dishDtos = dishes.stream().map((item) ->{
             DishDto dishDto1 = new DishDto();
             BeanUtils.copyProperties(item,dishDto1);
             LambdaQueryWrapper<DishFlavor> dishFlavorLambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -125,6 +156,8 @@ public class DishController {
             dishDto1.setFlavors(flavors);
             return dishDto1;
         }).collect(Collectors.toList());
+        //查完MySQL数据库，要把查询的数据在redis中存放一份，以便下次查询时直接查询缓存
+        redisTemplate.opsForValue().set(key,dishDtos,60l, TimeUnit.MINUTES);
         dishDtos.forEach(System.out::println);
         return R.success(dishDtos);
 

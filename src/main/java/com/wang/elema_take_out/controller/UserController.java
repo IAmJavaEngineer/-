@@ -9,6 +9,7 @@ import com.wang.elema_take_out.utils.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author wjh
@@ -27,6 +29,9 @@ import java.util.Map;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @PostMapping("/sendMsg")
     public R<String> sendMsg(@RequestBody User user, HttpSession session){
@@ -41,7 +46,10 @@ public class UserController {
             //4个参数分别是签名、模板CODE、手机号码和验证码
 //            SMSUtils.sendMessage("王同学博客","SMS_274970468",phone,code);
             //4、使用session保存用户手机号和验证码
-            session.setAttribute(phone,code);
+//            session.setAttribute(phone,code);
+
+            //4、将生成的验证码保存到redis中,并设置有效期为5分钟
+            redisTemplate.opsForValue().set(phone,code,5l, TimeUnit.MINUTES);
             return R.success("验证码发送成功");
         }
         return R.error("验证码发送失败");
@@ -59,8 +67,10 @@ public class UserController {
         String phone = (String) map.get("phone");
         //获取用户输入的验证码
         String code = (String) map.get("code");
-        //获取session中的验证码
-        String sessionCode = (String) session.getAttribute(phone);
+//        获取session中的验证码
+//        String sessionCode = (String) session.getAttribute(phone);
+        //从Redis中获取验证码
+        String sessionCode = redisTemplate.opsForValue().get(phone);
         //判断两个验证码是否相等
         if (sessionCode!=null && sessionCode.equals(code)){
             //如果相等的话就查询这个用户是否是新用户，如果是就自动为他注册
@@ -74,6 +84,8 @@ public class UserController {
             }
             //把用户id存放到session中
             session.setAttribute("user",user.getId());
+            //如果用户登录成功，把Redis中的验证码删除
+            redisTemplate.delete(phone);
             return R.success(user);
         }
         return R.error("验证码发送失败");
