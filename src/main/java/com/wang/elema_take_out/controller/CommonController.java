@@ -65,6 +65,11 @@ public class CommonController {
 
     }
 
+    /**
+     * 文件下载
+     * @param name
+     * @param response
+     */
     @GetMapping("/download")
     public void download(String name, HttpServletResponse response){
 
