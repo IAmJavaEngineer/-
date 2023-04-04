@@ -76,5 +76,5 @@ mybatis-plus:
       #主键策略：雪花算法
       id-type: assign_id
 
-basePath: /usr/local/img/
-#basePath: D:\img\
+#basePath: /usr/local/img/
+basePath: D:\img\
