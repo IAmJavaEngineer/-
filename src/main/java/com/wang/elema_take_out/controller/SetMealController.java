@@ -13,6 +13,10 @@ import com.wang.elema_take_out.dto.SetmealDto;
 import com.wang.elema_take_out.service.CategoryService;
 import com.wang.elema_take_out.service.SetmealDishService;
 import com.wang.elema_take_out.service.SetmealService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
@@ -33,6 +37,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequestMapping("/setmeal")
 @Transactional
+@Api(tags = "套餐相关接口")
 public class SetMealController {
 
     @Autowired
@@ -48,6 +53,7 @@ public class SetMealController {
     @PostMapping
     //@CacheEvict表示清理缓存，清理setmealCaChe分组下的所有缓存，allEntries默认为false，设置为true才能清理所有缓存
     @CacheEvict(value = "setmealCaChe",allEntries = true)
+    @ApiOperation(value = "新增套餐接口")
     public R<String> insert(@RequestBody SetmealDto setmealDto){
         setmealService.saveWithDish(setmealDto);
         return R.success("添加成功");
@@ -62,6 +68,12 @@ public class SetMealController {
      * @return
      */
     @GetMapping("/page")
+    @ApiOperation(value = "套餐分页接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page",value = "页码",required = true),
+            @ApiImplicitParam(name = "pageSize",value = "每页记录数",required = true),
+            @ApiImplicitParam(name = "page",value = "套餐名称",required = false)
+    })
     public R<Page<SetmealDto>> page(Integer page, Integer pageSize, String name){
         Page<Setmeal> setmealPage = new Page<>(page,pageSize);
 
@@ -109,6 +121,8 @@ public class SetMealController {
 
     @DeleteMapping
     @CacheEvict(value = "setmealCaChe",allEntries = true)
+    @ApiOperation(value = "删除套餐接口")
+    @ApiImplicitParam(name = "ids",value = "id数组",required = true)
     //前端传过来的参数是数组，不是字面量了，需要用@RequestParam来指定参数接收 ids=1,2,3
     public R<String> delete(@RequestParam List<Long> ids){
         setmealService.removeWithDish(ids);
@@ -122,15 +136,22 @@ public class SetMealController {
      */
     @PostMapping("/status/{status}")
     @CacheEvict(value = "setmealCaChe",allEntries = true)
+    @ApiOperation(value = "套餐起售和停售接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "status",value = "状态",required = true),
+            @ApiImplicitParam(name = "ids",value = "id数组",required = true)
+    })
     public R<String> status(@PathVariable Integer status,@RequestParam List<Long> ids){
         LambdaQueryWrapper<Setmeal> setmealLambdaQueryWrapper = new LambdaQueryWrapper<>();
         setmealLambdaQueryWrapper.in(Setmeal::getId,ids);
         Setmeal setmeal = new Setmeal();
         if(status == 0){
+            //停售操作
             //条件是id在ids里，并且状态为1
             setmealLambdaQueryWrapper.eq(Setmeal::getStatus,1);
             setmeal.setStatus(0);
         }else{
+            //起售操作
             //条件是id在ids里，并且状态为0
             setmealLambdaQueryWrapper.eq(Setmeal::getStatus,0);
             setmeal.setStatus(1);

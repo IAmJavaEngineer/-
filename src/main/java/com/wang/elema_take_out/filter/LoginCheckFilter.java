@@ -41,7 +41,11 @@ public class LoginCheckFilter implements Filter {
                 "/front/**",
                 "/common/**",
                 "/user/sendMsg",
-                "/user/login"
+                "/user/login",
+                "/doc.html",
+                "/webjars/**",
+                "/swagger-resources",
+                "/v2/api-docs"
         };
 
 //        3、将拦截的路径和urls中的路径进行匹配，如果匹配得上，就是不需要拦截的路径，否则就是需要拦截的路径
