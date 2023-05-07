@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * @create 2023-03-18
  */
 @RestController
-@RequestMapping("/dish")
+@RequestMapping("/admin/dish")
 @Slf4j
 @Transactional      //开启事务
 public class DishController {
@@ -172,8 +172,8 @@ public class DishController {
             dishDto1.setFlavors(flavors);
             return dishDto1;
         }).collect(Collectors.toList());
-        //查完MySQL数据库，要把查询的数据在redis中存放一份，以便下次查询时直接查询缓存
-        redisTemplate.opsForValue().set(key,dishDtos,60l, TimeUnit.MINUTES);
+        //查完MySQL数据库，要把查询的数据在redis中存放一份，以便下次查询时直接查询缓存，缓存时间为1分钟
+        redisTemplate.opsForValue().set(key,dishDtos,1L, TimeUnit.MINUTES);
         dishDtos.forEach(System.out::println);
         return R.success(dishDtos);
 
@@ -202,6 +202,18 @@ public class DishController {
         dishService.update(dish,dishLambdaQueryWrapper);
         return R.success("停售成功！");
     }
+
+    @DeleteMapping
+    public R<String> deleteDish(@RequestParam List<Long> ids){
+        LambdaQueryWrapper<Dish> dishLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        dishLambdaQueryWrapper.in(Dish::getId,ids).eq(Dish::getStatus,"0");
+        boolean remove = dishService.remove(dishLambdaQueryWrapper);
+        if (!remove){
+            return R.error("删除失败，请先将菜品停售再删除！");
+        }
+        return R.success("删除成功");
+    }
+
 
 
 

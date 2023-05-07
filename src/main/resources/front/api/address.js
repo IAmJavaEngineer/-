@@ -1,7 +1,7 @@
 //获取所有地址
 function addressListApi() {
     return $axios({
-      'url': '/addressBook/list',
+      'url': '/user/addressBook/list',
       'method': 'get',
     })
   }
@@ -9,7 +9,7 @@ function addressListApi() {
 //获取最新地址
 function addressLastUpdateApi() {
     return $axios({
-      'url': '/addressBook/lastUpdate',
+      'url': '/user/addressBook/lastUpdate',
       'method': 'get',
     })
 }
@@ -17,7 +17,7 @@ function addressLastUpdateApi() {
 //新增地址
 function  addAddressApi(data){
     return $axios({
-        'url': '/addressBook',
+        'url': '/user/addressBook',
         'method': 'post',
         data
       })
@@ -26,7 +26,7 @@ function  addAddressApi(data){
 //修改地址
 function  updateAddressApi(data){
     return $axios({
-        'url': '/addressBook',
+        'url': '/user/addressBook',
         'method': 'put',
         data
       })
@@ -35,7 +35,7 @@ function  updateAddressApi(data){
 //删除地址
 function deleteAddressApi(params) {
     return $axios({
-        'url': '/addressBook',
+        'url': '/user/addressBook',
         'method': 'delete',
         params
     })
@@ -44,7 +44,7 @@ function deleteAddressApi(params) {
 //查询单个地址
 function addressFindOneApi(id) {
   return $axios({
-    'url': `/addressBook/${id}`,
+    'url': `/user/addressBook/${id}`,
     'method': 'get',
   })
 }
@@ -52,7 +52,7 @@ function addressFindOneApi(id) {
 //设置默认地址
 function  setDefaultAddressApi(data){
   return $axios({
-      'url': '/addressBook/default',
+      'url': '/user/addressBook/default',
       'method': 'put',
       data
     })
@@ -61,7 +61,7 @@ function  setDefaultAddressApi(data){
 //获取默认地址
 function getDefaultAddressApi() {
   return $axios({
-    'url': `/addressBook/default`,
+    'url': `/user/addressBook/default`,
     'method': 'get',
   })
 }

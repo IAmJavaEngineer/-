@@ -1,7 +1,7 @@
 // 查询列表接口
 const getCategoryPage = (params) => {
   return $axios({
-    url: '/category/page',
+    url: '/admin/category/page',
     method: 'get',
     params
   })
@@ -10,7 +10,7 @@ const getCategoryPage = (params) => {
 // 编辑页面反查详情接口
 const queryCategoryById = (id) => {
   return $axios({
-    url: `/category/${id}`,
+    url: `/admin/category/${id}`,
     method: 'get'
   })
 }
@@ -18,7 +18,7 @@ const queryCategoryById = (id) => {
 // 删除当前列的接口
 const deleCategory = (ids) => {
   return $axios({
-    url: '/category',
+    url: '/admin/category',
     method: 'delete',
     params: { ids }
   })
@@ -27,7 +27,7 @@ const deleCategory = (ids) => {
 // 修改接口
 const editCategory = (params) => {
   return $axios({
-    url: '/category',
+    url: '/admin/category',
     method: 'put',
     data: { ...params }
   })
@@ -36,7 +36,7 @@ const editCategory = (params) => {
 // 新增接口
 const addCategory = (params) => {
   return $axios({
-    url: '/category',
+    url: '/admin/category',
     method: 'post',
     data: { ...params }
   })

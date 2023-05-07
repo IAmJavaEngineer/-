@@ -1,6 +1,6 @@
 function getMemberList (params) {
   return $axios({
-    url: '/employee/page',
+    url: '/admin/employee/page',
     method: 'get',
     params
   })
@@ -9,7 +9,7 @@ function getMemberList (params) {
 // 修改---启用禁用接口
 function enableOrDisableEmployee (params) {
   return $axios({
-    url: '/employee',
+    url: '/admin/employee',
     method: 'put',
     data: { ...params }
   })
@@ -18,7 +18,7 @@ function enableOrDisableEmployee (params) {
 // 新增---添加员工
 function addEmployee (params) {
   return $axios({
-    url: '/employee',
+    url: '/admin/employee',
     method: 'post',
     data: { ...params }
   })
@@ -27,7 +27,7 @@ function addEmployee (params) {
 // 修改---添加员工
 function editEmployee (params) {
   return $axios({
-    url: '/employee',
+    url: '/admin/employee',
     method: 'put',
     data: { ...params }
   })
@@ -36,7 +36,7 @@ function editEmployee (params) {
 // 修改页面反查详情接口
 function queryEmployeeById (id) {
   return $axios({
-    url: `/employee/${id}`,
+    url: `/admin/employee/${id}`,
     method: 'get'
   })
 }

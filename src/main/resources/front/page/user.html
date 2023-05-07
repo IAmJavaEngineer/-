@@ -21,10 +21,10 @@
             <div class="divTitle">
                 <i class="el-icon-arrow-left" @click="goBack"></i>个人中心
             </div>
-            <div class="divUser">
+            <div class="divUser" v-if="order[0]">
                 <img src="./../images/headPage.png"/>
                 <div class="desc">
-                    <div class="divName">林之迷 <img src="./../images/women.png"/></div>
+                    <div class="divName">{{order[0].userName}} <img src="./../images/women.png"/></div>
                     <div class="divPhone">{{userPhone}}</div>
                 </div>
             </div>

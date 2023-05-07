@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @Slf4j
-@RequestMapping("/setmeal")
+@RequestMapping("/admin/setmeal")
 @Transactional
 @Api(tags = "套餐相关接口")
 public class SetMealController {

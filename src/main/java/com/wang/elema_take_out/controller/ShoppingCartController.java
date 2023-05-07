@@ -16,7 +16,7 @@ import java.util.List;
  * @create 2023-03-29
  */
 @RestController
-@RequestMapping("/shoppingCart")
+@RequestMapping("/user/shoppingCart")
 @Slf4j
 public class ShoppingCartController {
 

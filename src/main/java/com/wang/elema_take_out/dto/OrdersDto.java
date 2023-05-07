@@ -14,6 +14,10 @@ import java.util.List;
  */
 @Data
 public class OrdersDto extends Orders {
+    //这条订单下一共有多少商品
     private Integer sumNum;
+
+    //这条订单的用户
+    private String userName;
 
 }

@@ -3,3 +3,24 @@
 有的话会把这三种类型的类转换成  ServletRegistrationBean、FilterRegistrationBean 或者ServletListenerRegistrationBean，
 然后让 Spring 容器去解析。 在 SpringBootApplication 上使用@ServletComponentScan 注解后，Servlet、Filter、Listener
 可以直接通过@WebServlet、@WebFilter、@WebListener 注解自动注册，无需其他代码。
+
+如果启动报错Error creating bean with name 'dataSource' defined in class path resource，说明数据源找不到，可能是使用了读写分离，
+注释掉pom中的sharding-jdbc-spring-boot-starter依赖和yml配置文件中的数据库主从库相关配置
+
+
+前端传json，后端用@RequestBody接收，一般用一个类来接收，这个类中的成员变量名和参数名一致就可以映射上
+前端用表单提交的方式传数据，一般也是post提交，一般也是json格式，接收方式同上
+前端传地址栏参数如?username=root&password=123，这种一般是get请求，后端接收只要参数名一致就可以了
+前端传restful风格，/status/{status}，这种一般是基本数据类型，后端接收用@PathVariable
+前端传数组，例如：在地址栏后拼接?ids=1,2,3,4,5      后端接收用List集合接收，加上@RequestParam注解
+
+OrderController的pipeLined方法，请求方式是PUT请求，这个方法的参数status和id在前端传的都是json格式，但不能用@RequestBody 接收两个参数，
+这里采用创建一个类来接收参数
+
+OrderController的ordersPage方法，日期直接使用字符串格式接收，LambdaQueryWrapper中日期直接用字符串比较大小也是可以的，
+ordersLambdaQueryWrapper.ge(Orders::getOrderTime,beginTime).le(Orders::getOrderTime,endTime);
+
+附：字符串转Date类型
+String beginTime = "2023-06-29 00:00:00";
+SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+Date begin = simpleDateFormat.parse(beginTime);

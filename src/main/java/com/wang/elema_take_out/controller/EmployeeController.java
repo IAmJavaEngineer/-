@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
  */
 @Slf4j
 @RestController
-@RequestMapping("/employee")
+@RequestMapping("/admin/employee")
 public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;

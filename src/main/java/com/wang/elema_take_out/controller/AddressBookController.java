@@ -18,7 +18,7 @@ import java.util.List;
  * @create 2023-03-28
  */
 @RestController
-@RequestMapping("/addressBook")
+@RequestMapping("/user/addressBook")
 @Slf4j
 public class AddressBookController {
     @Autowired
